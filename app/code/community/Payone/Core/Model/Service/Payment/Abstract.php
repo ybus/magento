@@ -57,6 +57,7 @@ abstract class Payone_Core_Model_Service_Payment_Abstract
 
     /**
      * @inheritdoc
+     * @throws Payone_Core_Exception_PaymentServiceError
      */
     public function execute(Mage_Sales_Model_Order_Payment $payment, $amount = 0.00)
     {
@@ -85,7 +86,7 @@ abstract class Payone_Core_Model_Service_Payment_Abstract
 
         if ($response instanceof Payone_Api_Response_Error) {
             /** @var $response Payone_Api_Response_Error */
-            $this->throwMageException($response->getCustomermessage());
+            throw new Payone_Core_Exception_PaymentServiceError($response);
         }
 
         return $response;
@@ -99,15 +100,6 @@ abstract class Payone_Core_Model_Service_Payment_Abstract
     protected function getEventGroup()
     {
         return self::EVENT_GROUP;
-    }
-
-    /**
-     * @param $message
-     * @throws Mage_Core_Exception
-     */
-    protected function throwMageException($message)
-    {
-        Mage::throwException($message);
     }
 
     /**
