@@ -496,4 +496,34 @@ abstract class Payone_Core_Model_Payment_Method_Abstract
         return $this->methodType;
     }
 
+    /**
+     * Retrieve payment method title
+     *
+     * @return string
+     */
+    public function getTitle()
+    {
+        $config = $this->getPaymentMethodConfig();
+        return $config === null ? parent::getTitle() : $config->getName();
+    }
+
+    /**
+     * Retrieve information from payment method configuration
+     *
+     * @author Markus Tacker <m@coderbyheart.de>
+     * @param int|null $storeId
+     * @return Payone_Core_Model_Config_Payment_Method_Interface
+     */
+    public function getPaymentMethodConfig($storeId = null)
+    {
+        if ($storeId === null) {
+            $store = $this->getData('store');
+            $storeId = ($store instanceof Mage_Core_Model_Store) ? $store->getId() : $store;
+        }
+        /** @var $config Payone_Core_Helper_Config */
+        $config = Mage::helper('payone_core/config');
+        $methods = $config->getConfigPayment($storeId)->getMethodsByType(preg_replace('/^payone_/', '', $this->getCode()));
+        return count($methods) == 1 ? array_shift($methods) : null;
+    }
+
 }
