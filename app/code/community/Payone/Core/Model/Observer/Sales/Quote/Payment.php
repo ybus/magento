@@ -43,19 +43,19 @@ class Payone_Core_Model_Observer_Sales_Quote_Payment
      */
     public function importDataBefore(Varien_Event_Observer $observer)
     {
-        /** @var $payment Mage_Sales_Model_Quote_Payment */
-        /** @var $input Varien_Object */
-        /** @var $event Varien_Event */
+        /** @var Varien_Event $event */
+        /** @var Mage_Sales_Model_Quote_Payment $payment */
+        /** @var Payone_Core_Helper_Config $configHelper */
         $event = $observer->getEvent();
         $payment = $event->getPayment();
-        $data = $event->getData();
-        $input = $data['input'];
-
-        $configId = $input->getPayoneConfigPaymentMethodId();
-
-        if (!empty($configId)) {
-            $payment->setPayoneConfigPaymentMethodId($configId);
+        $method = $payment->getMethodInstance()->getCode();
+        $configHelper = Mage::helper('payone_core/config');
+        $storePaymentMethods = $configHelper->getConfigPayment($payment->getQuote()->getStoreId());
+        foreach ($storePaymentMethods->getMethods() as $storePaymentMethod) {
+            /** @var Payone_Core_Model_Config_Payment_Method_Interface $storePaymentMethod */
+            if (Payone_Core_Model_System_Config_PaymentMethodCode::PREFIX . $storePaymentMethod->getCode() == $method) {
+                $payment->setPayoneConfigPaymentMethodId($storePaymentMethod->getId());
+            }
         }
-
     }
 }
