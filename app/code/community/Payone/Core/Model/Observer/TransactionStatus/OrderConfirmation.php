@@ -52,8 +52,7 @@ class Payone_Core_Model_Observer_TransactionStatus_OrderConfirmation
     public function onAppointed(Varien_Event_Observer $observer)
     {
         $this->initData($observer);
-
-
+        if ($this->order->getEmailSent()) return;
         $this->getServiceOrderConfirmation()->sendMail($this->order);
     }
 
