@@ -132,6 +132,8 @@ class Payone_Core_Model_Mapper_ApiRequest_Payment_Debit
             $invoicing->setInvoiceid($creditmemoIncrementId);
             $invoicing->setInvoiceappendix($appendix);
 
+            $discountAmount = 0;
+
             // Regular order items:
             foreach ($creditmemo->getItemsCollection() as $itemData) {
                 /** @var $itemData Mage_Sales_Model_Order_Creditmemo_Item */
@@ -163,6 +165,9 @@ class Payone_Core_Model_Mapper_ApiRequest_Payment_Debit
                 $item = new Payone_Api_Request_Parameter_Invoicing_Item();
                 $item->init($params);
                 $invoicing->addItem($item);
+
+                // Calculate relative discount amount
+                $discountAmount += ((float)$orderItem->getDiscountAmount())*$itemData->getQty()/$orderItem->getQtyOrdered();
             }
 
             // Refund shipping
@@ -181,7 +186,6 @@ class Payone_Core_Model_Mapper_ApiRequest_Payment_Debit
             }
 
             // Add Discount as a position
-            $discountAmount = $creditmemo->getDiscountAmount();
             if ($discountAmount > 0) {
                 $invoicing->addItem($this->mapDiscountAsItem(-1 * $discountAmount));
             }
